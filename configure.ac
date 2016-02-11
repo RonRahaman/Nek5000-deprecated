@@ -1,10 +1,10 @@
 AC_INIT([Nek5000],[x.x])
-AC_CONFIG_MACRO_DIR([config])
+#AC_CONFIG_MACRO_DIR([config])
+m4_include([config/fortran_backport.m4])
 
 # ---- FROM MAKENEK ----
 AC_ARG_VAR([CC], [The C compiler])
 AC_ARG_VAR([F77], [The Fortran 77 compiler])
-
 
 # ---- FROM MAKENEK.INC ----
 PPLIST=""
@@ -66,14 +66,19 @@ AC_ARG_ENABLE([neknek],
 
 # Check for SIZE
 
+# There are some useful Autoconf 2.69 macros (AC_FC_SRCEXT, AC_FC_PP_SRCEXT, 
+# AC_FC_PP_DEFINE) that can check $FC for Fortran 77 features.  However, 
+# equivalents macros are not provided to check $F77.  Therefore, for the 
+# remainder of the script, $FC will be set to $F77. At the end, $F77 will 
+# be set to $FC and $FC will be set to its original value.
+USER_FC="${FC}"
+FC="${F77}"
+
 # Test F77 (missing some from makenek.inc)
-#AC_PROG_F77([gfortran pgf77 ifort xlf77])
-#AC_PROG_F77_MPI()
-AC_PROG_FC([gfortran pgf90 ifort], [Fortran 77])
 #AC_PROG_FC_MPI()
 
 # Test CC (missing some from makenek.inc)
-AC_PROG_CC([gcc pgcc icc xlcc])
+AC_PROG_CC()
 #AC_PROG_CC_MPI()
 
 # Clean executable, subuser.o
@@ -85,8 +90,12 @@ AC_CHECK_SIZEOF([int *])
 # Check if F77 adds underscore to external functions (name-mangling scheme?)
 
 # Check which F77 and set compiler-specific flags
-## Discover cpp flag
-AC_FC_PP_SRCEXT([f])
+## Discover PP extension
+AC_PROG_FC([],[Fortran 77])
+#AX_PROG_FC_MPI()
+AC_FC_SRCEXT([F77])
+AC_FC_PP_SRCEXT([F77])
+AC_FC_PP_DEFINE()
 
 # Set preprocessor symbols...
 
@@ -115,5 +124,8 @@ AC_FC_PP_SRCEXT([f])
 # Generate SIZE file
 
 # Generate .usr file
+
+F77="${FC}"
+FC="${USER_FC}"
 
 AC_OUTPUT
