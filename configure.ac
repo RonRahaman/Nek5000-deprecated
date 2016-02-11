@@ -5,6 +5,27 @@ m4_include([config/fortran_backport.m4])
 # ---- FROM MAKENEK ----
 AC_ARG_VAR([CC], [The C compiler])
 AC_ARG_VAR([F77], [The Fortran 77 compiler])
+AC_ARG_ENABLE([mpi],   
+              [AS_HELP_STRING([--enable-mpi], [enable MPI (default: yes)])],
+              [], [$enable_mpi="yes"])
+AC_ARG_ENABLE([cmt],   
+              [AS_HELP_STRING([--enable-cmt], [enable CMT (default: yes)])],
+              [], [$enable_cmt="yes"])
+AC_ARG_ENABLE([amg],   
+              [AS_HELP_STRING([--enable-amg], [enable CMT instead of XXT (default: no)])],
+              [], [$enable_amg="no"])
+AC_ARG_ENABLE([amg-dump],   
+              [AS_HELP_STRING([--enable-amg-dump], [(default: no)])],
+              [], [$enable_amg_dump="no"])
+AC_ARG_ENABLE([visit], 
+              [AS_HELP_STRING([--enable-visit], [enable VisIt in situ (default: no)])],
+              [], [$enable_visit="no"])
+AC_ARG_ENABLE([visit-stop], 
+              [AS_HELP_STRING([--enable-visit-stop], [If using VisIt, stop after first step and wait for visit to connect (default: no)])],
+              [], [$enable_visit_stop="no"])
+AC_ARG_VAR([VISIT_INSTALL])
+AC_ARG_VAR([VISIT_LIB])
+AC_ARG_VAR([VISIT_INC])
 
 # ---- FROM MAKENEK.INC ----
 PPLIST=""
@@ -50,21 +71,11 @@ AC_ARG_ENABLE([blas_mxm],
               [AS_HELP_STRING([--disable-blas-mxm], [disable nek-supplied BLAS routines])],
               [AS_IF([test "x$enableval" != "xno"], [], [PPLIST="${PPLIST} BLAS_MXM"])])
 
-AC_ARG_ENABLE([neknek],
+AC_ARG_ENABLE([extbar],
               [AS_HELP_STRING([--enable-extbar], [adds underscore to exit call(for BGQ)])],
               [AS_IF([test "x$enableval" != "xno"], [PPLIST="${PPLIST} EXTBAR"])])
 
 # Check makenek version
-
-# Check nocompile option
-
-# Set CASENAME, CASEDIR, APATH_SRC, SOURCE_ROOT, IFMOAB, IFNEKNEK
-
-# Check if out-of-source
-
-# Check for .usr
-
-# Check for SIZE
 
 # There are some useful Autoconf 2.69 macros (AC_FC_SRCEXT, AC_FC_PP_SRCEXT, 
 # AC_FC_PP_DEFINE) that can check $FC for Fortran 77 features.  However, 
@@ -74,12 +85,11 @@ AC_ARG_ENABLE([neknek],
 USER_FC="${FC}"
 FC="${F77}"
 
-# Test F77 (missing some from makenek.inc)
-#AC_PROG_FC_MPI()
+# Test F77 compiler
+AC_PROG_FC([],[Fortran 77])
 
-# Test CC (missing some from makenek.inc)
+# Test C compiler
 AC_PROG_CC()
-#AC_PROG_CC_MPI()
 
 # Clean executable, subuser.o
 
@@ -91,10 +101,9 @@ AC_CHECK_SIZEOF([int *])
 
 # Check which F77 and set compiler-specific flags
 ## Discover PP extension
-AC_PROG_FC([],[Fortran 77])
 #AX_PROG_FC_MPI()
-AC_FC_SRCEXT([F77])
-AC_FC_PP_SRCEXT([F77])
+AC_FC_SRCEXT([f77])
+AC_FC_PP_SRCEXT([f77])
 AC_FC_PP_DEFINE()
 
 # Set preprocessor symbols...
